@@ -13,12 +13,12 @@ namespace AnimeListProgram
 {
     public partial class Form1 : Form
     {
-        readonly int columnNum = 4;   //リストにいるコラムの数。普通変わらないはずなのでreadonly
+    //    readonly int columnNum = 4;   //リストにいるコラムの数。普通変わらないはずなのでreadonly
         readonly string defaultPath = "defaultPath.txt";    //デフォルトパスが記憶されているファイルのパス
         readonly DateTime todayDay;
         readonly int todayDate;
 
-        List<string[]> currentList; //現在処理中のリスト(読み込んだファイルすべてを記録しておく)
+        List<string[]> currentList; //現在処理中のリスト(フィルタは無視する、つまりファイルの生データ)
 
 
         public Form1()
@@ -32,9 +32,10 @@ namespace AnimeListProgram
         {
             listView1.ColumnClick += new ColumnClickEventHandler(listView1_ColumnClick);    //listView1.ColumnClickにコラムイベントハンドラを追加
             today.Text = todayDay.ToString("yyyy/MM/dd") + "(" + dateNumToString(todayDate) + ")";
+            //デフォルトパスが書いてあるtxtをカレントディレクトリから探して読み込み、ない場合は開くcsvを選ばせる
             if (!File.Exists(defaultPath))
             {
-                MessageBox.Show("開くtxtを選んでください");
+                MessageBox.Show("開くcsvを選んでください");
                 selectProgram();
             }
             else
@@ -75,6 +76,7 @@ namespace AnimeListProgram
         {
             string def = fileName.Text;
             File.WriteAllText(defaultPath, def);//defaultPath.txtにデフォルトにするパスを記述し上書き保存する(場所はexeと同じディレクトリ)
+            MessageBox.Show("現在のリストをデフォルトにしました");
         }
 
 
@@ -86,19 +88,14 @@ namespace AnimeListProgram
         /// <param name="filename">読み込むファイル名</param>
         private void loadProgram(string filename)
         {
-            using (var infile = new StreamReader(new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read)))//StreamReaderを作成し、同時に処理を記述
+            using (var infile = new StreamReader(new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read), Encoding.Default))//StreamReaderを作成し、同時に処理を記述
             {
                 var list = new List<string[]>();
-                for (; ; )
+                while (!infile.EndOfStream)
                 {
-                    string[] str = new string[columnNum];
-                    for (int i = 0; i < columnNum; i++)
-                    {
-                        str[i] = infile.ReadLine();
-                    }
+                    string line = infile.ReadLine();
+                    string[] str = line.Split(',');
                     list.Add(str);
-                    if (str[columnNum - 1] == null) break;
-
                 }
                 foreach (string[] data in list) { listView1.Items.Add(new ListViewItem(data)); }
                 foreach (ColumnHeader ch in listView1.Columns) { ch.Width = -2; }//リストの幅を調整する。
