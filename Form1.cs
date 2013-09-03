@@ -13,7 +13,7 @@ namespace AnimeListProgram
 {
     public partial class Form1 : Form
     {
-    //    readonly int columnNum = 4;   //リストにいるコラムの数。普通変わらないはずなのでreadonly
+        //    readonly int columnNum = 4;   //リストにいるコラムの数。普通変わらないはずなのでreadonly
         readonly string defaultPath = "defaultPath.txt";    //デフォルトパスが記憶されているファイルのパス
         readonly DateTime todayDay;
         readonly int todayDate;
@@ -59,7 +59,7 @@ namespace AnimeListProgram
 
         private void todayButton_Click(object sender, EventArgs e)
         {
-
+            filterDate(todayDate);
         }
 
         private void openButton_Click(object sender, EventArgs e)
@@ -77,6 +77,49 @@ namespace AnimeListProgram
             string def = fileName.Text;
             File.WriteAllText(defaultPath, def);//defaultPath.txtにデフォルトにするパスを記述し上書き保存する(場所はexeと同じディレクトリ)
             MessageBox.Show("現在のリストをデフォルトにしました");
+        }
+
+        private void SunToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            filterDate(dateStringToNum("日"));
+        }
+
+        private void MonToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            filterDate(dateStringToNum("月"));
+        }
+
+        private void TueToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            filterDate(dateStringToNum("火"));
+        }
+
+        private void WedToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            filterDate(dateStringToNum("水"));
+        }
+
+        private void ThuToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            filterDate(dateStringToNum("木"));
+        }
+
+        private void FriToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            filterDate(dateStringToNum("金"));
+        }
+
+        private void SatToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            filterDate(dateStringToNum("土"));
+        }
+
+        private void allToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            listView1.Items.Clear();
+            foreach (string[] data in currentList) { listView1.Items.Add(new ListViewItem(data)); }
+            foreach (ColumnHeader ch in listView1.Columns) { ch.Width = -2; }//リストの幅を調整する。
+
         }
 
 
@@ -143,9 +186,33 @@ namespace AnimeListProgram
             else
             {
                 num = -1;
-                MessageBox.Show("不正な曜日デス");
             }
             return num;
         }
+        /// <summary>
+        /// 引数の曜日のリストを返す
+        /// </summary>
+        /// <param name="date">曜日を表すint</param>
+        /// <returns>フィルターがかけられたリスト</returns>
+        private List<string[]> filterDate(int date)
+        {
+            List<string[]> list = new List<string[]>();
+            foreach (string[] s in currentList)
+            {
+                int d = dateStringToNum(s[2]);
+                if (d == date)
+                {
+                    list.Add(s);
+                }
+            }
+            listView1.Items.Clear();
+            foreach (string[] data in list) { listView1.Items.Add(new ListViewItem(data)); }
+            foreach (ColumnHeader ch in listView1.Columns) { ch.Width = -2; }//リストの幅を調整する。
+            dateSplitButton.Text = dateNumToString(date);
+
+            return list;
+        }
+
+
     }
 }
