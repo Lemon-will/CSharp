@@ -14,11 +14,25 @@ namespace AnimeListProgram
     public partial class Form1 : Form
     {
         //    readonly int columnNum = 4;   //リストにいるコラムの数。普通変わらないはずなのでreadonly
-        readonly string defaultPath = "defaultPath.txt";    //デフォルトパスが記憶されているファイルのパス
+        readonly static string defaultPath = "defaultPath.txt";    //デフォルトパスが記憶されているファイルのパス
+        readonly static string timePath = "time.txt";              //日付の境を記録しておくおくtxtのパス(そのうち設定系全部統合するつもり)
         readonly DateTime todayDay;
         readonly int todayDate;
 
         List<string[]> currentList; //現在処理中のリスト(フィルタは無視する、つまりファイルの生データ)
+        int daySeparate;
+        int DaySeparate
+        {
+            set
+            {
+                daySeparate = value;
+                File.WriteAllText(timePath, daySeparate.ToString());
+            }
+            get
+            {
+                return daySeparate;
+            }
+        }    //何時を境目にするかのプロパティ。setの行き先は先頭小文字
 
 
         public Form1()
@@ -42,6 +56,15 @@ namespace AnimeListProgram
             {
                 string s = File.ReadAllText(defaultPath);
                 loadProgram(s);
+            }
+            if (!File.Exists(timePath))
+            {
+                DaySeparate = 0;
+            }
+            else
+            {
+                DaySeparate = int.Parse(File.ReadAllText(timePath));
+                numericUpDown1.Value = DaySeparate;
             }
         }
 
@@ -121,6 +144,10 @@ namespace AnimeListProgram
             foreach (ColumnHeader ch in listView1.Columns) { ch.Width = -2; }//リストの幅を調整する。
 
         }
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+            DaySeparate = (int)numericUpDown1.Value;//境目を更新
+        }
 
 
         /*  以下ファイル処理などの処理系メソッド  */
@@ -153,7 +180,6 @@ namespace AnimeListProgram
         private void selectProgram()
         {
             if (openFileDialog1.ShowDialog() != DialogResult.OK) return;//OK以外がクリックされた場合は中止
-
             loadProgram(openFileDialog1.FileName);
         }
 
@@ -169,7 +195,7 @@ namespace AnimeListProgram
 
         /// <summary>
         /// string型の日本語表記の曜日を日を0としたint型にする
-        /// 曜日以外のstringを受け取った場合はエラーのメッセージを出現させ、-1を返す。
+        /// 曜日以外のstringを受け取った場合は-1を返す。
         /// </summary>
         /// <param name="date">string型の曜日</param>
         /// <returns>日=0、月=1…としたint。曜日以外のstringの場合は-1を返す。</returns>
@@ -200,7 +226,12 @@ namespace AnimeListProgram
             foreach (string[] s in currentList)
             {
                 int d = dateStringToNum(s[2]);
-                if (d == date)
+                int t = int.Parse(s[3].Substring(0, 2));
+                if ((d == date) && (t >= DaySeparate))
+                {
+                    list.Add(s);
+                }
+                else if ((d == (date + 1) % 7) && (t < DaySeparate))
                 {
                     list.Add(s);
                 }
@@ -212,6 +243,7 @@ namespace AnimeListProgram
 
             return list;
         }
+
 
 
     }
