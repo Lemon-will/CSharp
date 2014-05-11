@@ -82,7 +82,7 @@ namespace AnimeListProgram
 
         private void todayButton_Click(object sender, EventArgs e)
         {
-            filterDate(todayDate);
+            filterDate(myDate(todayDate));
         }
 
         private void openButton_Click(object sender, EventArgs e)
@@ -223,25 +223,45 @@ namespace AnimeListProgram
         private List<string[]> filterDate(int date)
         {
             List<string[]> list = new List<string[]>();
-            foreach (string[] s in currentList)
-            {
-                int d = dateStringToNum(s[2]);
-                int t = int.Parse(s[3].Substring(0, 2));
-                if ((d == date) && (t >= DaySeparate))
+                foreach (string[] s in currentList)
                 {
-                    list.Add(s);
+                    int d = dateStringToNum(s[2]);
+                    int t = int.Parse(s[3].Substring(0, 2));
+                    if ((d == date) && (t >= DaySeparate))
+                    {
+                        list.Add(s);
+                    }
+                    else if ((d == (date + 1) % 7) && (t < DaySeparate))
+                    {
+                        list.Add(s);
+                    }
                 }
-                else if ((d == (date + 1) % 7) && (t < DaySeparate))
-                {
-                    list.Add(s);
-                }
-            }
             listView1.Items.Clear();
             foreach (string[] data in list) { listView1.Items.Add(new ListViewItem(data)); }
             foreach (ColumnHeader ch in listView1.Columns) { ch.Width = -2; }//リストの幅を調整する。
             dateSplitButton.Text = dateNumToString(date);
 
             return list;
+        }
+        /// <summary>
+        /// daySeparateに依存した曜日に変更する
+        /// </summary>
+        /// <param name="date">変更したい曜日</param>
+        /// <returns></returns>
+        private int myDate(int date) {
+            int mydate;
+            int nowTime = todayDay.Hour;
+            if (nowTime >= daySeparate)
+            {
+                mydate = date;
+            }
+            else
+            {
+                mydate = (date - 1) % 7;
+            }
+
+
+            return mydate;
         }
 
 
