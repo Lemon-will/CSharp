@@ -38,7 +38,7 @@ namespace AnimeListProgram
         public Form1()
         {
             InitializeComponent();
-            todayDay = DateTime.Today;
+            todayDay = DateTime.Now;
             todayDate = (int)todayDay.DayOfWeek;
         }
 
@@ -251,7 +251,8 @@ namespace AnimeListProgram
         private int myDate(int date) {
             int mydate;
             int nowTime = todayDay.Hour;
-            if (nowTime >= daySeparate)
+            Console.WriteLine(nowTime);
+            if (nowTime > daySeparate)
             {
                 mydate = date;
             }
